@@ -101,7 +101,7 @@ class BankAccountTest {
         "10.00, 10.00, 0.00",
         "10.00, 3.00, 7.00"
     )
-    fun `should decrease balance when receiving a withdrawal`(
+    fun `should decrease balance and generate transaction history when receiving a withdrawal with valid amount`(
         depositAmount: Double,
         withdrawalAmount: Double,
         expectedBalance: Double
