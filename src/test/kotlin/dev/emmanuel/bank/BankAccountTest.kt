@@ -96,26 +96,6 @@ class BankAccountTest {
         )
     }
 
-    @Test
-    fun `should keep balance consistent in a concurrent scenario`(): Unit = runBlocking {
-        val depositAmount = 10.00
-        val withdrawalAmount = 5.00
-        val expectedBalance = AtomicReference(0.0)
-        val bankAccount = BankAccount(number = "12345")
-
-        coroutineScope {
-            repeat(10000) {
-                launch(Dispatchers.Default) {
-                    expectedBalance.updateAndGet { it + (depositAmount - withdrawalAmount) }
-                    bankAccount.deposit(depositAmount)
-                    bankAccount.withdraw(withdrawalAmount)
-                }
-            }
-        }
-
-        assertThat(bankAccount.balance()).isEqualTo(expectedBalance.get())
-    }
-
     @ParameterizedTest
     @CsvSource(
         "10.00, 10.00, 0.00",
@@ -140,5 +120,25 @@ class BankAccountTest {
             Transaction.DepositTransaction(depositAmount),
             Transaction.WithdrawTransaction(withdrawalAmount)
         )
+    }
+
+    @Test
+    fun `should keep balance consistent in a concurrent scenario`(): Unit = runBlocking {
+        val depositAmount = 10.00
+        val withdrawalAmount = 5.00
+        val expectedBalance = AtomicReference(0.0)
+        val bankAccount = BankAccount(number = "12345")
+
+        coroutineScope {
+            repeat(10000) {
+                launch(Dispatchers.Default) {
+                    expectedBalance.updateAndGet { it + (depositAmount - withdrawalAmount) }
+                    bankAccount.deposit(depositAmount)
+                    bankAccount.withdraw(withdrawalAmount)
+                }
+            }
+        }
+
+        assertThat(bankAccount.balance()).isEqualTo(expectedBalance.get())
     }
 }
